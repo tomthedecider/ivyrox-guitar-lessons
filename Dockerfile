@@ -1,6 +1,6 @@
 # Builds one deployable image: the Express API serves both /api/* and the
 # built React app, so a single service (Render, Railway, Fly.io, etc.)
-# covers the whole app. Build context is this ivyrox/ directory.
+# covers the whole app. Build context is the repo root.
 
 FROM node:22-alpine AS frontend-build
 WORKDIR /app/frontend

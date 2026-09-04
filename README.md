@@ -31,10 +31,9 @@ library, and progress, and gives the teacher a weekly prep view.
 ## Project layout
 
 ```
-ivyrox/
-  backend/    Express API (src/), Prisma schema + migrations (prisma/)
-  frontend/   Vite React app (src/)
-  Dockerfile  Single-image build: API + built frontend, one deployable service
+backend/    Express API (src/), Prisma schema + migrations (prisma/)
+frontend/   Vite React app (src/)
+Dockerfile  Single-image build: API + built frontend, one deployable service
 ```
 
 ## Local development
@@ -95,7 +94,6 @@ The `Dockerfile` at the repo root builds one image that serves both the API
 as one web service on any container host (Render, Railway, Fly.io, etc.):
 
 ```bash
-cd ivyrox
 docker build -t ivyrox .
 docker run -p 4000:4000 \
   -e DATABASE_URL="file:/data/prod.db" \
@@ -112,15 +110,14 @@ the schema provider as described above; no volume needed.
 **Connecting to GitHub for deploy:**
 
 1. Push this repo to GitHub (already done if you're reading this there).
-2. `.github/workflows/ivyrox-ci.yml` builds and type-checks the backend,
-   frontend, and Docker image on every push/PR touching `ivyrox/**` — treat
-   a green run as your merge gate.
-3. Pick a host that can build from a Dockerfile and deploy on push to
-   `main` (Render and Railway both do this natively via their GitHub
-   integration — connect the repo, point the build at the `ivyrox/`
-   directory, and set the `DATABASE_URL` / `JWT_SECRET` env vars above in
-   their dashboard). No credentials for a hosting provider are stored in
-   this repo, so that connection has to be made from the provider's side.
+2. `.github/workflows/ci.yml` builds and type-checks the backend, frontend,
+   and Docker image on every push/PR — treat a green run as your merge gate.
+3. Pick a host that can build from a Dockerfile and deploy on push to `main`
+   (Render and Railway both do this natively via their GitHub integration —
+   connect the repo, point the build at the repo root, and set the
+   `DATABASE_URL` / `JWT_SECRET` env vars above in their dashboard). No
+   credentials for a hosting provider are stored in this repo, so that
+   connection has to be made from the provider's side.
 
 ## API overview
 
