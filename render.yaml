@@ -1,0 +1,39 @@
+# Render Blueprint: deploy this repo with "New +" -> "Blueprint" in the
+# Render dashboard, pointing at this repo. It provisions two independent
+# web services from the two branches below, each with its own URL, so dev
+# work can be reviewed before it ever reaches the prod service.
+#
+# Both use Render's free plan, which has no persistent disk — SQLite lives
+# on the container's ephemeral filesystem, so data resets on every deploy
+# or restart. That's fine for a dev/staging preview. Before relying on the
+# prod service for real data, either add a paid instance + persistent disk
+# (see Render's docs on Disks) or switch to Postgres (see this repo's
+# README, "Switching to Postgres") and add a Render Postgres instance here.
+services:
+  - type: web
+    name: ivyrox-dev
+    runtime: docker
+    branch: develop
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: file:/tmp/dev.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SEED_ON_BOOT
+        value: "true"
+
+  - type: web
+    name: ivyrox-prod
+    runtime: docker
+    branch: main
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: file:/tmp/prod.db
+      - key: JWT_SECRET
+        generateValue: true

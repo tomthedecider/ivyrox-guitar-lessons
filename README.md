@@ -112,12 +112,50 @@ the schema provider as described above; no volume needed.
 1. Push this repo to GitHub (already done if you're reading this there).
 2. `.github/workflows/ci.yml` builds and type-checks the backend, frontend,
    and Docker image on every push/PR — treat a green run as your merge gate.
-3. Pick a host that can build from a Dockerfile and deploy on push to `main`
-   (Render and Railway both do this natively via their GitHub integration —
-   connect the repo, point the build at the repo root, and set the
-   `DATABASE_URL` / `JWT_SECRET` env vars above in their dashboard). No
+3. Pick a host that can build from a Dockerfile and deploy on push (Render
+   and Railway both do this natively via their GitHub integration). No
    credentials for a hosting provider are stored in this repo, so that
    connection has to be made from the provider's side.
+
+## Dev environment (Render)
+
+`render.yaml` at the repo root is a [Render Blueprint](https://render.com/docs/blueprint-spec)
+that provisions **two** independent web services from two branches, so you
+can see a change working before it reaches production:
+
+| Branch    | Service       | Purpose                                              |
+| --------- | ------------- | ----------------------------------------------------- |
+| `develop` | `ivyrox-dev`  | Auto-seeded with the sample teacher/student/songs — click around and confirm a change before promoting it. |
+| `main`    | `ivyrox-prod` | Production. Never auto-seeded.                        |
+
+### One-time setup
+
+1. Push the `develop` branch (already created — see below).
+2. In the Render dashboard: **New +** → **Blueprint** → connect this GitHub
+   repo. Render reads `render.yaml` and creates both services in one step,
+   each with its own `onrender.com` URL and its own generated `JWT_SECRET`.
+3. Open the `ivyrox-dev` service's URL once the first deploy finishes and
+   sign in with the seeded accounts (same credentials as local dev, above).
+
+### Day-to-day workflow
+
+1. Branch from `develop`, make changes, push — Render redeploys `ivyrox-dev`
+   automatically and you get a URL to actually click through.
+2. Happy with it? Merge into `develop` (if you branched off it) so the dev
+   service reflects the latest state, confirm once more, then open a PR
+   from `develop` into `main`.
+3. Merging that PR redeploys `ivyrox-prod` automatically.
+
+Both services are on Render's free plan, which has **no persistent disk** —
+SQLite resets on every deploy/restart. That's a non-issue for `ivyrox-dev`
+(it's meant to be disposable and always shows fresh seed data), but before
+trusting `ivyrox-prod` with real lesson data, do one of:
+
+- Add a paid Render instance + a [persistent disk](https://render.com/docs/disks),
+  mount it, and point `DATABASE_URL` at a file on it, or
+- Switch to Postgres (see "Switching to Postgres" above) and add a Render
+  Postgres instance, wiring its connection string into `ivyrox-prod`'s
+  `DATABASE_URL`.
 
 ## API overview
 
