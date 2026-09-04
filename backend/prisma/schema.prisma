@@ -1,0 +1,103 @@
+// Ivyrox data model.
+//
+// SQLite is the zero-setup default for local dev. To run against Postgres,
+// change `provider` below to "postgresql" and point DATABASE_URL at it — the
+// schema works unchanged against either. (Enum-typed columns below are
+// plain Strings because SQLite has no native enum support; the allowed
+// values are enforced in src/types.ts and the zod schemas in each route.)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String // "TEACHER" | "STUDENT"
+  createdAt    DateTime @default(now())
+
+  assignmentsGiven    Assignment[]      @relation("AssignedBy")
+  assignmentsReceived Assignment[]      @relation("AssignedTo")
+  libraryProgress     LibraryProgress[]
+  practiceLogs        PracticeLog[]
+  chordMastery        ChordMastery[]
+}
+
+// A song or technical exercise the teacher has catalogued. Every assignable
+// or library-browsable item is a Song row; `isLibrary` controls whether it
+// shows up in the student's self-serve pool.
+model Song {
+  id           String   @id @default(cuid())
+  title        String
+  artist       String?
+  type         String   @default("SONG") // "SONG" | "EXERCISE"
+  tabUrl       String?
+  referenceUrl String?
+  tipsNote     String?
+  isLibrary    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  assignments     Assignment[]
+  libraryProgress LibraryProgress[]
+}
+
+// A teacher-assigned, due-date-driven piece of work. Completion is
+// student-reported but only counts once the teacher confirms it.
+model Assignment {
+  id           String    @id @default(cuid())
+  song         Song      @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId       String
+  student      User      @relation("AssignedTo", fields: [studentId], references: [id])
+  studentId    String
+  assignedBy   User      @relation("AssignedBy", fields: [assignedById], references: [id])
+  assignedById String
+  dueDate      DateTime?
+  notes        String?
+  status       String    @default("ASSIGNED") // "ASSIGNED" | "PENDING_CONFIRMATION" | "APPROVED"
+  markedDoneAt DateTime?
+  approvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+// The student's relationship to a library (optional pool) song: added to
+// her own list, and whether she considers it learned. No teacher approval.
+model LibraryProgress {
+  id        String   @id @default(cuid())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId    String
+  status    String   @default("LEARNING") // "LEARNING" | "LEARNED"
+  addedAt   DateTime @default(now())
+  learnedAt DateTime?
+
+  @@unique([studentId, songId])
+}
+
+// One row per calendar day the student practiced, used to derive the
+// consecutive-day streak.
+model PracticeLog {
+  id        String   @id @default(cuid())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  date      DateTime // normalized to midnight UTC, one per day
+
+  @@unique([studentId, date])
+}
+
+model ChordMastery {
+  id         String    @id @default(cuid())
+  student    User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId  String
+  chordName  String
+  mastered   Boolean   @default(false)
+  masteredAt DateTime?
+
+  @@unique([studentId, chordName])
+}
