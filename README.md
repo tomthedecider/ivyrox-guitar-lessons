@@ -25,8 +25,9 @@ library, and progress, and gives the teacher a weekly prep view.
 
 - **Frontend**: React + Vite + TypeScript + Tailwind CSS, React Router.
 - **Backend**: Node + Express + TypeScript, Prisma ORM, JWT auth.
-- **Database**: SQLite for local dev (zero setup); the same Prisma schema
-  runs against Postgres by switching one line (see below).
+- **Database**: Postgres. [Neon](https://neon.tech) is the recommended free
+  host — no local install needed, works the same for local dev and both
+  Render services (see "Persistence" below).
 
 ## Project layout
 
@@ -38,15 +39,17 @@ Dockerfile  Single-image build: API + built frontend, one deployable service
 
 ## Local development
 
-Requires Node 20+.
+Requires Node 20+ and a Postgres connection string (see "Persistence" below
+for the easiest way to get one — a free Neon project takes under a minute
+and needs no local install).
 
 ### 1. Backend
 
 ```bash
 cd backend
-cp .env.example .env      # defaults work as-is for local SQLite
+cp .env.example .env      # then paste your Postgres connection string in
 npm install
-npx prisma migrate dev    # creates dev.db and applies the schema
+npx prisma migrate deploy # applies the existing schema — don't use `migrate dev` against a shared/hosted database
 npm run seed               # optional: seed a teacher + student + sample songs
 npm run dev                 # http://localhost:4000
 ```
@@ -71,21 +74,33 @@ npm run dev   # http://localhost:5173, proxies /api to the backend
 
 Open `http://localhost:5173` and sign in with one of the seeded accounts.
 
-## Switching to Postgres
+## Persistence
 
-The schema is written to be portable. In `backend/prisma/schema.prisma`,
-change:
+The app needs one Postgres database per environment where data should
+stick around: one for local dev / `ivyrox-dev`, and a **separate** one for
+`ivyrox-prod` (don't share a database between dev and prod — dev's seeded
+demo accounts and casual testing shouldn't touch real lesson data).
 
-```prisma
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-```
+[Neon](https://neon.tech) is the recommended host — its free tier doesn't
+expire the way some "free trial" database tiers do, and setup is just:
 
-to `provider = "postgresql"`, point `DATABASE_URL` (in `.env`) at your
-Postgres instance, then run `npx prisma migrate dev` again to generate a
-fresh migration for that provider.
+1. Sign up at neon.tech (GitHub login is fine).
+2. Create a project named something like `ivyrox-dev`. Neon gives you a
+   connection string immediately (**Dashboard → Connection Details**) —
+   copy the one labeled for `psql` / general use, starting with
+   `postgresql://`.
+3. Create a **second** project, `ivyrox-prod`, and copy its connection
+   string too. (Neon's free tier supports multiple projects — if it
+   doesn't for your account, a second free host or Neon's paid tier both
+   work identically here; nothing in this repo assumes Neon specifically.)
+4. Paste the `ivyrox-dev` string into your local `backend/.env` as
+   `DATABASE_URL`, and also into the `ivyrox-dev` Render service's
+   Environment tab. Paste the `ivyrox-prod` string into the `ivyrox-prod`
+   Render service's Environment tab.
+
+That's the only manual step — everything else (schema, migrations, the
+Dockerfile) already targets Postgres and needs no further changes per
+environment.
 
 ## Deployment
 
@@ -96,16 +111,10 @@ as one web service on any container host (Render, Railway, Fly.io, etc.):
 ```bash
 docker build -t ivyrox .
 docker run -p 4000:4000 \
-  -e DATABASE_URL="file:/data/prod.db" \
+  -e DATABASE_URL="postgresql://user:password@host/dbname" \
   -e JWT_SECRET="<a long random string>" \
-  -v ivyrox-data:/data \
   ivyrox
 ```
-
-For SQLite in production, mount a persistent volume and point `DATABASE_URL`
-at a path on it (as above) — otherwise the database resets on every deploy.
-For Postgres, just set `DATABASE_URL` to your connection string and switch
-the schema provider as described above; no volume needed.
 
 **Connecting to GitHub for deploy:**
 
@@ -134,6 +143,11 @@ can see a change working before it reaches production:
 2. In the Render dashboard: **New +** → **Blueprint** → connect this GitHub
    repo. Render reads `render.yaml` and creates both services in one step,
    each with its own `onrender.com` URL and its own generated `JWT_SECRET`.
+   `DATABASE_URL` isn't set by the blueprint (it's a secret, so it isn't
+   committed to the repo) — Render will prompt you for it per service
+   during sync, or you can fill it in afterward under each service's
+   Environment tab. See "Persistence" below for where those two
+   connection strings come from.
 3. Open the `ivyrox-dev` service's URL once the first deploy finishes and
    sign in with the seeded accounts (same credentials as local dev, above).
 
@@ -145,17 +159,6 @@ can see a change working before it reaches production:
    service reflects the latest state, confirm once more, then open a PR
    from `develop` into `main`.
 3. Merging that PR redeploys `ivyrox-prod` automatically.
-
-Both services are on Render's free plan, which has **no persistent disk** —
-SQLite resets on every deploy/restart. That's a non-issue for `ivyrox-dev`
-(it's meant to be disposable and always shows fresh seed data), but before
-trusting `ivyrox-prod` with real lesson data, do one of:
-
-- Add a paid Render instance + a [persistent disk](https://render.com/docs/disks),
-  mount it, and point `DATABASE_URL` at a file on it, or
-- Switch to Postgres (see "Switching to Postgres" above) and add a Render
-  Postgres instance, wiring its connection string into `ivyrox-prod`'s
-  `DATABASE_URL`.
 
 ## API overview
 

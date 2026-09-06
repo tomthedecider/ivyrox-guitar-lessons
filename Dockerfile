@@ -36,8 +36,6 @@ EXPOSE 4000
 # Applies pending migrations, optionally seeds sample data (set
 # SEED_ON_BOOT=true — intended for a dev/staging service only, never prod,
 # since the seed script creates accounts with published default passwords),
-# then starts the server. DATABASE_URL and JWT_SECRET must be set in the
-# deployment environment; for SQLite, DATABASE_URL should point at a path
-# on a mounted persistent volume, or an ephemeral path if resetting the
-# database on every deploy is acceptable (e.g. a preview/dev environment).
+# then starts the server. DATABASE_URL (a Postgres connection string) and
+# JWT_SECRET must be set in the deployment environment.
 CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_ON_BOOT\" = \"true\" ]; then npm run seed; fi && node dist/index.js"]

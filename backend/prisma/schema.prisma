@@ -1,16 +1,15 @@
-// Ivyrox data model.
-//
-// SQLite is the zero-setup default for local dev. To run against Postgres,
-// change `provider` below to "postgresql" and point DATABASE_URL at it — the
-// schema works unchanged against either. (Enum-typed columns below are
-// plain Strings because SQLite has no native enum support; the allowed
-// values are enforced in src/types.ts and the zod schemas in each route.)
+// Ivyrox data model. Runs on Postgres (see the root README's Persistence
+// section for setup). Enum-like columns below are plain Strings rather
+// than native Postgres enums — the app was originally built against
+// SQLite, which has no enum support, and keeping them as strings avoided
+// a churn-y migration when moving to Postgres. The allowed values are
+// enforced in src/types.ts and the zod schemas in each route.
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

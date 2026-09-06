@@ -3,12 +3,14 @@
 # web services from the two branches below, each with its own URL, so dev
 # work can be reviewed before it ever reaches the prod service.
 #
-# Both use Render's free plan, which has no persistent disk — SQLite lives
-# on the container's ephemeral filesystem, so data resets on every deploy
-# or restart. That's fine for a dev/staging preview. Before relying on the
-# prod service for real data, either add a paid instance + persistent disk
-# (see Render's docs on Disks) or switch to Postgres (see this repo's
-# README, "Switching to Postgres") and add a Render Postgres instance here.
+# DATABASE_URL is intentionally left unset here (`sync: false`) rather
+# than hardcoded — it's a Postgres connection string with real
+# credentials, so it shouldn't live in the repo. Render will prompt you
+# to fill it in per-service during Blueprint sync, or you can set/update
+# it later under each service's Environment tab. Use two SEPARATE
+# Postgres databases (one per service) — see this repo's README,
+# "Persistence", for how to get connection strings (Neon is the
+# recommended free host) and exactly what to paste where.
 services:
   - type: web
     name: ivyrox-dev
@@ -19,7 +21,7 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
-        value: file:/tmp/dev.db
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: SEED_ON_BOOT
@@ -34,6 +36,6 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
-        value: file:/tmp/prod.db
+        sync: false
       - key: JWT_SECRET
         generateValue: true
