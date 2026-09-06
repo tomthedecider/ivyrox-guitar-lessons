@@ -11,6 +11,10 @@ RUN npm run build
 
 FROM node:22-alpine AS backend-build
 WORKDIR /app/backend
+# Prisma's engine binaries need OpenSSL to load; Alpine ships without it,
+# which otherwise makes prisma generate/migrate crash with a "libssl" or
+# "Could not parse schema engine response" error at runtime.
+RUN apk add --no-cache openssl
 COPY backend/package*.json ./
 RUN npm ci
 COPY backend/ ./
@@ -19,6 +23,7 @@ RUN npm run build
 
 FROM node:22-alpine AS runtime
 WORKDIR /app/backend
+RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 COPY backend/package*.json ./
 RUN npm ci --omit=dev
