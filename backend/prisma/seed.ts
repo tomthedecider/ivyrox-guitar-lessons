@@ -15,21 +15,42 @@ const OPEN_CHORDS = [
   "B minor (barre)",
 ];
 
+// Set TEACHER_EMAIL/TEACHER_PASSWORD/STUDENT_EMAIL/STUDENT_PASSWORD to seed
+// real accounts instead of the demo ones below (e.g. for a production
+// environment, where the demo credentials — published in this repo's
+// README — shouldn't be usable). When any of those are set, the demo
+// sample content (songs, chords, assignments) is skipped too, so a real
+// environment doesn't get seeded with fictional lesson data.
+const teacherEmail = process.env.TEACHER_EMAIL ?? "teacher@ivyrox.app";
+const teacherPasswordPlain = process.env.TEACHER_PASSWORD ?? "teach-ivyrox";
+const studentEmail = process.env.STUDENT_EMAIL ?? "student@ivyrox.app";
+const studentPasswordPlain = process.env.STUDENT_PASSWORD ?? "play-ivyrox";
+const isCustomSeed = Boolean(
+  process.env.TEACHER_EMAIL || process.env.TEACHER_PASSWORD || process.env.STUDENT_EMAIL || process.env.STUDENT_PASSWORD
+);
+
 async function main() {
-  const teacherPassword = await bcrypt.hash("teach-ivyrox", 10);
-  const studentPassword = await bcrypt.hash("play-ivyrox", 10);
+  const teacherPassword = await bcrypt.hash(teacherPasswordPlain, 10);
+  const studentPassword = await bcrypt.hash(studentPasswordPlain, 10);
 
   const teacher = await prisma.user.upsert({
-    where: { email: "teacher@ivyrox.app" },
+    where: { email: teacherEmail },
     update: {},
-    create: { email: "teacher@ivyrox.app", name: "Teacher", role: "TEACHER", passwordHash: teacherPassword },
+    create: { email: teacherEmail, name: "Teacher", role: "TEACHER", passwordHash: teacherPassword },
   });
 
   const student = await prisma.user.upsert({
-    where: { email: "student@ivyrox.app" },
+    where: { email: studentEmail },
     update: {},
-    create: { email: "student@ivyrox.app", name: "Student", role: "STUDENT", passwordHash: studentPassword },
+    create: { email: studentEmail, name: "Student", role: "STUDENT", passwordHash: studentPassword },
   });
+
+  if (isCustomSeed) {
+    console.log("Seed complete (accounts only — demo sample content skipped for a custom seed).");
+    console.log(`  Teacher login: ${teacherEmail}`);
+    console.log(`  Student login: ${studentEmail}`);
+    return;
+  }
 
   for (const chordName of OPEN_CHORDS) {
     await prisma.chordMastery.upsert({
@@ -122,8 +143,8 @@ async function main() {
   });
 
   console.log("Seed complete.");
-  console.log("  Teacher login: teacher@ivyrox.app / teach-ivyrox");
-  console.log("  Student login: student@ivyrox.app / play-ivyrox");
+  console.log(`  Teacher login: ${teacherEmail} / ${teacherPasswordPlain}`);
+  console.log(`  Student login: ${studentEmail} / ${studentPasswordPlain}`);
 }
 
 main()

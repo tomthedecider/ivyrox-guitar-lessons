@@ -61,8 +61,14 @@ Seeded logins (from `npm run seed`):
 | Teacher | teacher@ivyrox.app    | teach-ivyrox   |
 | Student | student@ivyrox.app    | play-ivyrox    |
 
-**Change these before deploying anywhere real** — either edit
-`prisma/seed.ts` or create your own users.
+**Don't use these for a real deployment** — anyone with access to this
+repo can read them. Instead, set `TEACHER_EMAIL`, `TEACHER_PASSWORD`,
+`STUDENT_EMAIL`, and `STUDENT_PASSWORD` as environment variables before
+running `npm run seed` (or set them as env vars on the hosting platform
+and enable `SEED_ON_BOOT` for one deploy — see "Dev environment (Render)"
+below). When any of those are set, the seed creates only those two
+accounts — no demo songs, chords, or assignments — so a real environment
+doesn't end up with fictional lesson content mixed into real data.
 
 ### 2. Frontend
 
@@ -154,6 +160,17 @@ can see a change working before it reaches production:
    connection strings come from.
 3. Open the `ivyrox-dev` service's URL once the first deploy finishes and
    sign in with the seeded accounts (same credentials as local dev, above).
+4. `ivyrox-prod` has no accounts yet — it's deliberately never
+   auto-seeded. To create real ones: on the `ivyrox-prod` service's
+   Environment tab, add `TEACHER_EMAIL`, `TEACHER_PASSWORD`,
+   `STUDENT_EMAIL`, `STUDENT_PASSWORD` (your own real values — never the
+   demo ones above) alongside `SEED_ON_BOOT=true`, save (triggers a
+   redeploy that creates just those two accounts, no demo content), then
+   remove `SEED_ON_BOOT` again afterward so it doesn't keep re-running on
+   every future restart. Safe to leave the credential env vars in place —
+   the seed only *creates* an account if that email doesn't already
+   exist, so re-running it never overwrites a password or touches any
+   other data.
 
 ### Day-to-day workflow
 
