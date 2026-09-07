@@ -18,8 +18,8 @@ export default function Layout() {
   const links = user?.role === "TEACHER" ? teacherLinks : studentLinks;
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-stone-200 bg-white">
+    <div className="flex min-h-screen flex-col">
+      <header className="shrink-0 border-b border-stone-200 bg-white">
         <div className="mx-auto max-w-4xl px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <span className="shrink-0 text-lg font-semibold tracking-tight">Ivyrox</span>
@@ -50,7 +50,7 @@ export default function Layout() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-4 py-8">
         <Outlet />
       </main>
     </div>
