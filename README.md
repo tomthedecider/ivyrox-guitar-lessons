@@ -85,11 +85,15 @@ demo accounts and casual testing shouldn't touch real lesson data).
 expire the way some "free trial" database tiers do, and setup is just:
 
 1. Sign up at neon.tech (GitHub login is fine).
-2. Create a project named something like `ivyrox-dev`. Neon gives you a
+2. Create a project named something like `ivyrox-dev`, region **Frankfurt**
+   (`eu-central-1`) — matches `region: frankfurt` in `render.yaml`. Keep
+   the app server and database in the same region; which region that
+   should be depends on where your actual users are (see the note in
+   `render.yaml`), not on where you personally are. Neon gives you a
    connection string immediately (**Dashboard → Connection Details**) —
    copy the one labeled for `psql` / general use, starting with
    `postgresql://`.
-3. Create a **second** project, `ivyrox-prod`, and copy its connection
+3. Create a **second** project, `ivyrox-prod`, same region, and copy its connection
    string too. (Neon's free tier supports multiple projects — if it
    doesn't for your account, a second free host or Neon's paid tier both
    work identically here; nothing in this repo assumes Neon specifically.)

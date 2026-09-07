@@ -3,6 +3,15 @@
 # web services from the two branches below, each with its own URL, so dev
 # work can be reviewed before it ever reaches the prod service.
 #
+# region: frankfurt on both — the primary/daily user is in Munich, so the
+# app server should sit close to her and to the Neon databases (also in
+# Frankfurt), keeping the frequent app<->DB round trips fast. The
+# occasional/secondary user is farther away; that single extra hop is an
+# accepted tradeoff. Render can't change a service's region after
+# creation — if these services already exist in a different region,
+# delete them in the dashboard first, then re-sync this Blueprint to
+# recreate them fresh in Frankfurt.
+#
 # DATABASE_URL is intentionally left unset here (`sync: false`) rather
 # than hardcoded — it's a Postgres connection string with real
 # credentials, so it shouldn't live in the repo. Render will prompt you
@@ -15,6 +24,7 @@ services:
   - type: web
     name: ivyrox-dev
     runtime: docker
+    region: frankfurt
     branch: develop
     plan: free
     dockerfilePath: ./Dockerfile
@@ -30,6 +40,7 @@ services:
   - type: web
     name: ivyrox-prod
     runtime: docker
+    region: frankfurt
     branch: main
     plan: free
     dockerfilePath: ./Dockerfile
