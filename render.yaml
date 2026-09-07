@@ -20,6 +20,16 @@
 # Postgres databases (one per service) — see this repo's README,
 # "Persistence", for how to get connection strings (Neon is the
 # recommended free host) and exactly what to paste where.
+#
+# PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=true skips the advisory lock
+# `prisma migrate deploy` normally takes before running — that lock
+# exists to stop two migrations racing each other, but each service here
+# runs a single instance with one deploy at a time, so the risk it
+# guards against doesn't apply. Worth keeping this in mind if that ever
+# changes (e.g. multiple replicas): re-enable the lock by removing this
+# var. Without it, deploys intermittently failed with a P1002 timeout —
+# Prisma's 10-second wait for the lock is hardcoded and not reliable
+# against Neon's free-tier compute waking from an idle suspend.
 services:
   - type: web
     name: ivyrox-dev
@@ -36,6 +46,8 @@ services:
         generateValue: true
       - key: SEED_ON_BOOT
         value: "true"
+      - key: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK
+        value: "true"
 
   - type: web
     name: ivyrox-prod
@@ -50,3 +62,5 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK
+        value: "true"

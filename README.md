@@ -112,6 +112,19 @@ That's the only manual step — everything else (schema, migrations, the
 Dockerfile) already targets Postgres and needs no further changes per
 environment.
 
+**If a deploy fails with `P1002` / "Timed out trying to acquire a postgres
+advisory lock"**: this is a known Prisma behavior, not something specific
+to a bad connection string — `prisma migrate deploy` takes a lock before
+running to stop two migrations racing each other, and that wait is a
+hardcoded, non-configurable 10 seconds. It surfaced intermittently against
+Neon's free tier, most likely tied to compute wake-latency after an idle
+suspend. `render.yaml` already sets
+`PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=true` on both services to skip that
+lock — safe here since each service runs one instance, one deploy at a
+time, so the concurrent-migration scenario the lock guards against can't
+happen. (If this project ever runs multiple replicas of a service, remove
+that variable first.)
+
 ## Deployment
 
 The `Dockerfile` at the repo root builds one image that serves both the API
