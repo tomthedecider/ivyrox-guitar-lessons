@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --grad: linear-gradient(90deg, theme(colors.magenta), theme(colors.violet) 55%, theme(colors.cyan));
+  color-scheme: dark;
+}
+
 body {
-  @apply bg-stone-50 text-stone-900;
+  @apply bg-bg text-ink font-sans;
+}
+
+h1, h2, h3 {
+  @apply font-display tracking-tight;
 }

@@ -26,51 +26,51 @@ export default function StudentLibrary() {
     await load();
   }
 
-  if (loading) return <p className="text-stone-500">Loading…</p>;
+  if (loading) return <p className="text-muted">Loading…</p>;
 
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold">Song library</h1>
-        <p className="text-sm text-stone-500">Browse and pick up anything you like — no approval needed.</p>
+        <p className="text-sm text-muted">Browse and pick up anything you like — no approval needed.</p>
       </div>
 
       <ul className="space-y-3">
         {songs.map((song) => (
-          <li key={song.id} className="rounded-xl border border-stone-200 bg-white p-4">
+          <li key={song.id} className="rounded-xl border border-line bg-card p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <h2 className="font-medium">{song.title}</h2>
-                {song.artist && <p className="text-sm text-stone-500">{song.artist}</p>}
+                {song.artist && <p className="text-sm text-dim">{song.artist}</p>}
                 <div className="mt-2 flex gap-3 text-sm">
                   {song.tabUrl && (
-                    <a href={song.tabUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                    <a href={song.tabUrl} target="_blank" rel="noreferrer" className="text-cyan underline hover:text-magenta">
                       Tab / chord sheet
                     </a>
                   )}
                   {song.referenceUrl && (
-                    <a href={song.referenceUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                    <a href={song.referenceUrl} target="_blank" rel="noreferrer" className="text-cyan underline hover:text-magenta">
                       Reference recording
                     </a>
                   )}
                 </div>
-                {song.tipsNote && <p className="mt-2 text-sm italic text-stone-500">Tip: {song.tipsNote}</p>}
+                {song.tipsNote && <p className="mt-2 text-sm italic text-muted">Tip: {song.tipsNote}</p>}
               </div>
 
               <div className="shrink-0">
                 {!song.progress ? (
                   <button
                     onClick={() => add(song.id)}
-                    className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-100"
+                    className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted hover:bg-chip hover:text-ink"
                   >
                     Add to my list
                   </button>
                 ) : (
-                  <div className="flex gap-1 rounded-lg border border-stone-300 p-0.5 text-sm">
+                  <div className="flex gap-1 rounded-lg border border-line p-0.5 text-sm">
                     <button
                       onClick={() => setStatus(song.id, "LEARNING")}
                       className={`rounded-md px-2 py-1 ${
-                        song.progress.status === "LEARNING" ? "bg-amber-100 text-amber-800" : "text-stone-500"
+                        song.progress.status === "LEARNING" ? "bg-violet-tint text-violet" : "text-dim"
                       }`}
                     >
                       Learning
@@ -78,7 +78,7 @@ export default function StudentLibrary() {
                     <button
                       onClick={() => setStatus(song.id, "LEARNED")}
                       className={`rounded-md px-2 py-1 ${
-                        song.progress.status === "LEARNED" ? "bg-emerald-100 text-emerald-800" : "text-stone-500"
+                        song.progress.status === "LEARNED" ? "bg-gold-tint text-gold" : "text-dim"
                       }`}
                     >
                       Learned

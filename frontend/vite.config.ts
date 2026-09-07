@@ -13,8 +13,8 @@ export default defineConfig({
         name: "Ivyrox",
         short_name: "Ivyrox",
         description: "Guitar lesson assignments, practice library, and progress tracking.",
-        theme_color: "#1c1917",
-        background_color: "#1c1917",
+        theme_color: "#16121c",
+        background_color: "#16121c",
         display: "standalone",
         start_url: "/",
         icons: [
