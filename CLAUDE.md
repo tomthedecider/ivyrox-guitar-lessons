@@ -14,3 +14,9 @@
   manually in each Render service's Environment tab, not committed.
 - Workflow: branch off `develop` → push → verify on `ivyrox-dev` → PR into
   `main` → `ivyrox-prod` redeploys.
+- Practice-clip recordings (`Assignment.recording`) are stored as Postgres
+  `Bytes`, capped at 5MB per upload — there's no persistent disk on Render's
+  free plan, so this is the simplest option for two users. There is no
+  pruning/cleanup path; storage grows indefinitely with usage. Worth
+  revisiting (object storage, a retention policy) if Neon's free-tier
+  storage ceiling ever becomes a concern.

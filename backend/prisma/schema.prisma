@@ -5,7 +5,8 @@
 // a churn-y migration when moving to Postgres. The allowed values are
 // enforced in src/types.ts and the zod schemas in each route.
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -62,6 +63,17 @@ model Assignment {
   markedDoneAt DateTime?
   approvedAt   DateTime?
   createdAt    DateTime  @default(now())
+
+  // Optional practice-clip submission attached when the student marks the
+  // assignment done, and the teacher's reply when reviewing it. Kept as
+  // plain columns on Assignment (one clip, one comment) rather than a
+  // separate table — this app has one teacher and one student, not a
+  // multi-message thread.
+  recording         Bytes?
+  recordingMimeType String?
+  recordingSize     Int?
+  recordedAt        DateTime?
+  teacherComment    String?
 }
 
 // The student's relationship to a library (optional pool) song: added to

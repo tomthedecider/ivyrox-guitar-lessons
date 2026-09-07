@@ -47,6 +47,10 @@ export interface Assignment {
   createdAt: string;
   song: Song;
   student: { id: string; name: string };
+  recordingMimeType: string | null;
+  recordingSize: number | null;
+  recordedAt: string | null;
+  teacherComment: string | null;
 }
 
 export interface ChordMastery {

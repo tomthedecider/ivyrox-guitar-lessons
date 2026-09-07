@@ -17,10 +17,13 @@ class ApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
+  // A FormData body (file upload) sets its own multipart boundary — a
+  // hardcoded JSON Content-Type here would break it.
+  const isFormData = options.body instanceof FormData;
   const res = await fetch(`/api${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -44,6 +47,17 @@ export const api = {
   put: <T>(path: string, data?: unknown) =>
     request<T>(path, { method: "PUT", body: data ? JSON.stringify(data) : undefined }),
   del: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  upload: <T>(path: string, formData: FormData) => request<T>(path, { method: "POST", body: formData }),
+  // Bypasses request()'s res.json() — used for binary responses (audio
+  // playback) where a plain <audio src> can't carry our Bearer token.
+  blob: async (path: string): Promise<Blob> => {
+    const token = getToken();
+    const res = await fetch(`/api${path}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) throw new ApiError(res.status, `Request failed (${res.status})`);
+    return res.blob();
+  },
 };
 
 export { ApiError };

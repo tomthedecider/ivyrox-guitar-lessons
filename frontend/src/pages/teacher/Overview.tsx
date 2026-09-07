@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { TeacherOverview as Overview } from "../../types";
+import AudioPlayer from "../../components/AudioPlayer";
 import { formatDate } from "../../lib/format";
 
 export default function TeacherOverview() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [comments, setComments] = useState<Record<string, string>>({});
 
   async function load() {
     const data = await api.get<Overview>("/teacher/overview");
@@ -19,7 +21,7 @@ export default function TeacherOverview() {
   async function approve(id: string) {
     setBusyId(id);
     try {
-      await api.patch(`/assignments/${id}/approve`);
+      await api.patch(`/assignments/${id}/approve`, { teacherComment: comments[id] || undefined });
       await load();
     } finally {
       setBusyId(null);
@@ -29,7 +31,7 @@ export default function TeacherOverview() {
   async function reject(id: string) {
     setBusyId(id);
     try {
-      await api.patch(`/assignments/${id}/reject`);
+      await api.patch(`/assignments/${id}/reject`, { teacherComment: comments[id] || undefined });
       await load();
     } finally {
       setBusyId(null);
@@ -62,6 +64,20 @@ export default function TeacherOverview() {
                       {a.student.name} marked this done {formatDate(a.markedDoneAt)}
                     </p>
                     {a.notes && <p className="mt-1 text-sm text-muted">Notes: {a.notes}</p>}
+                    <div className="mt-2">
+                      {a.recordingSize != null ? (
+                        <AudioPlayer assignmentId={a.id} />
+                      ) : (
+                        <p className="text-xs text-dim">No recording attached.</p>
+                      )}
+                    </div>
+                    <textarea
+                      value={comments[a.id] ?? ""}
+                      onChange={(e) => setComments({ ...comments, [a.id]: e.target.value })}
+                      placeholder="Feedback for this attempt (optional)…"
+                      rows={2}
+                      className="mt-2 w-full rounded-lg border border-line bg-chip px-3 py-2 text-sm text-ink placeholder:text-dim"
+                    />
                   </div>
                   <div className="flex shrink-0 gap-2">
                     <button

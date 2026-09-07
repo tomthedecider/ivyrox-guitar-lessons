@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { Assignment } from "../../types";
 import StatusBadge from "../../components/StatusBadge";
+import AudioRecorder from "../../components/AudioRecorder";
+import AudioPlayer from "../../components/AudioPlayer";
 import { formatDate, isOverdue } from "../../lib/format";
 
 export default function StudentAssignments() {
@@ -78,6 +80,13 @@ export default function StudentAssignments() {
                 </button>
               )}
             </div>
+            {(a.status !== "APPROVED" || a.recordingSize != null || a.teacherComment) && (
+              <div className="mt-3 space-y-2 border-t border-line-soft pt-3">
+                {a.status !== "APPROVED" && <AudioRecorder assignmentId={a.id} onUploaded={load} />}
+                {a.recordingSize != null && <AudioPlayer assignmentId={a.id} />}
+                {a.teacherComment && <p className="text-sm text-cyan">Teacher feedback: {a.teacherComment}</p>}
+              </div>
+            )}
           </li>
         ))}
       </ul>

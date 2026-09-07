@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { ChordMastery, SongLearnedEntry, StreakInfo } from "../../types";
 import { formatDate } from "../../lib/format";
+import ChordDiagram from "../../components/ChordDiagram";
 
 export default function StudentProgress() {
   const [timeline, setTimeline] = useState<SongLearnedEntry[]>([]);
@@ -86,31 +87,34 @@ export default function StudentProgress() {
           {chords.map((chord) => (
             <li key={chord.id}>
               <label
-                className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-cyan ${
+                className={`flex cursor-pointer flex-col items-center gap-2 rounded-lg border px-3 py-3 text-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-cyan ${
                   chord.mastered
                     ? "border-gold-line bg-gold-tint text-gold shadow-[0_0_14px_oklch(0.8_0.15_85_/_20%)]"
                     : "border-line text-muted hover:bg-chip"
                 }`}
               >
                 <input type="checkbox" checked={chord.mastered} onChange={() => toggleChord(chord)} className="sr-only" />
-                {chord.mastered ? (
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="shrink-0"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  <span className="h-3.5 w-3.5 shrink-0 rounded-sm border border-line" />
-                )}
-                {chord.chordName}
+                <ChordDiagram chordName={chord.chordName} />
+                <span className="flex items-center gap-1.5">
+                  {chord.mastered ? (
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="shrink-0"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <span className="h-3.5 w-3.5 shrink-0 rounded-sm border border-line" />
+                  )}
+                  {chord.chordName}
+                </span>
               </label>
             </li>
           ))}
