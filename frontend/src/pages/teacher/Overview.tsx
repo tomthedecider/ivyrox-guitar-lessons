@@ -55,8 +55,8 @@ export default function TeacherOverview() {
           <ul className="space-y-3">
             {overview.pendingReview.map((a) => (
               <li key={a.id} className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-medium">{a.song.title}</h3>
                     <p className="text-sm text-stone-600">
                       {a.student.name} marked this done {formatDate(a.markedDoneAt)}

@@ -39,7 +39,7 @@ export default function StudentLibrary() {
         {songs.map((song) => (
           <li key={song.id} className="rounded-xl border border-stone-200 bg-white p-4">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="font-medium">{song.title}</h2>
                 {song.artist && <p className="text-sm text-stone-500">{song.artist}</p>}
                 <div className="mt-2 flex gap-3 text-sm">

@@ -51,8 +51,8 @@ export default function StudentProgress() {
       </div>
 
       <section className="rounded-xl border border-stone-200 bg-white p-5">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
             <h2 className="font-medium">Practice streak</h2>
             <p className="text-3xl font-semibold tabular-nums">
               {streak.currentStreak} <span className="text-base font-normal text-stone-500">day{streak.currentStreak === 1 ? "" : "s"}</span>

@@ -20,34 +20,34 @@ export default function Layout() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-stone-200 bg-white">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-6">
-            <span className="text-lg font-semibold tracking-tight">Ivyrox</span>
-            <nav className="flex gap-4 text-sm">
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.end}
-                  className={({ isActive }) =>
-                    `rounded-md px-2 py-1 transition ${
-                      isActive ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-100"
-                    }`
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
+        <div className="mx-auto max-w-4xl px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="shrink-0 text-lg font-semibold tracking-tight">Ivyrox</span>
+            <div className="flex min-w-0 items-center gap-2 text-sm text-stone-500">
+              <span className="truncate">
+                {user?.name} · {user?.role === "TEACHER" ? "Teacher" : "Student"}
+              </span>
+              <button onClick={logout} className="shrink-0 rounded-md px-2 py-1 hover:bg-stone-100">
+                Sign out
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-sm text-stone-500">
-            <span>
-              {user?.name} · {user?.role === "TEACHER" ? "Teacher" : "Student"}
-            </span>
-            <button onClick={logout} className="rounded-md px-2 py-1 hover:bg-stone-100">
-              Sign out
-            </button>
-          </div>
+          <nav className="mt-2 flex gap-2 text-sm">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={({ isActive }) =>
+                  `rounded-md px-2 py-1 transition ${
+                    isActive ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-100"
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-8">

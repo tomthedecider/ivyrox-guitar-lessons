@@ -44,8 +44,8 @@ export default function StudentAssignments() {
         {assignments.map((a) => (
           <li key={a.id} className="rounded-xl border border-stone-200 bg-white p-4">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-medium">{a.song.title}</h2>
                   <StatusBadge status={a.status} />
                 </div>
