@@ -4,7 +4,9 @@ import { Assignment } from "../../types";
 import StatusBadge from "../../components/StatusBadge";
 import AudioRecorder from "../../components/AudioRecorder";
 import AudioPlayer from "../../components/AudioPlayer";
-import { formatDate, isOverdue } from "../../lib/format";
+import Metronome from "../../components/Metronome";
+import ReferenceEmbed from "../../components/ReferenceEmbed";
+import { formatDate, isOverdue, parseBpm } from "../../lib/format";
 
 export default function StudentAssignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -62,13 +64,12 @@ export default function StudentAssignments() {
                       Tab / chord sheet
                     </a>
                   )}
-                  {a.song.referenceUrl && (
-                    <a href={a.song.referenceUrl} target="_blank" rel="noreferrer" className="text-cyan underline hover:text-magenta">
-                      Reference recording
-                    </a>
-                  )}
                 </div>
+                {a.song.referenceUrl && <ReferenceEmbed url={a.song.referenceUrl} />}
                 {a.song.tipsNote && <p className="mt-2 text-sm italic text-muted">Tip: {a.song.tipsNote}</p>}
+                <div className="mt-2">
+                  <Metronome initialBpm={parseBpm(a.notes) ?? parseBpm(a.song.tipsNote) ?? 80} />
+                </div>
               </div>
               {a.status === "ASSIGNED" && (
                 <button

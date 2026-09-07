@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { LibrarySong, LibraryStatus } from "../../types";
+import ReferenceEmbed from "../../components/ReferenceEmbed";
 
 export default function StudentLibrary() {
   const [songs, setSongs] = useState<LibrarySong[]>([]);
@@ -48,12 +49,8 @@ export default function StudentLibrary() {
                       Tab / chord sheet
                     </a>
                   )}
-                  {song.referenceUrl && (
-                    <a href={song.referenceUrl} target="_blank" rel="noreferrer" className="text-cyan underline hover:text-magenta">
-                      Reference recording
-                    </a>
-                  )}
                 </div>
+                {song.referenceUrl && <ReferenceEmbed url={song.referenceUrl} />}
                 {song.tipsNote && <p className="mt-2 text-sm italic text-muted">Tip: {song.tipsNote}</p>}
               </div>
 
