@@ -16,6 +16,7 @@ export default function TeacherCatalog() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   async function load() {
     setSongs(await api.get<Song[]>("/songs"));
@@ -25,11 +26,34 @@ export default function TeacherCatalog() {
     load();
   }, []);
 
+  function startEdit(song: Song) {
+    setEditingId(song.id);
+    setForm({
+      title: song.title,
+      artist: song.artist ?? "",
+      type: song.type,
+      tabUrl: song.tabUrl ?? "",
+      referenceUrl: song.referenceUrl ?? "",
+      tipsNote: song.tipsNote ?? "",
+      isLibrary: song.isLibrary,
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(emptyForm);
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post("/songs", form);
+      if (editingId) {
+        await api.patch(`/songs/${editingId}`, form);
+        setEditingId(null);
+      } else {
+        await api.post("/songs", form);
+      }
       setForm(emptyForm);
       await load();
     } finally {
@@ -43,6 +67,15 @@ export default function TeacherCatalog() {
         <h1 className="text-xl font-semibold">Song catalog</h1>
         <p className="text-sm text-muted">Everything assignable or browsable in the library.</p>
       </div>
+
+      {editingId && (
+        <p className="text-sm text-cyan">
+          Editing “{songs.find((s) => s.id === editingId)?.title}” —{" "}
+          <button type="button" onClick={cancelEdit} className="underline hover:text-magenta">
+            cancel
+          </button>
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="grid gap-3 rounded-xl border border-line bg-card p-5 sm:grid-cols-2">
         <input
@@ -99,17 +132,26 @@ export default function TeacherCatalog() {
           disabled={saving}
           className="rounded-lg bg-[image:var(--grad)] px-3 py-2 font-medium text-accent-ink shadow-[0_0_16px_oklch(0.72_0.19_345_/_35%)] transition hover:brightness-110 disabled:opacity-50 disabled:shadow-none sm:col-span-2"
         >
-          {saving ? "Adding…" : "Add to catalog"}
+          {saving ? (editingId ? "Saving…" : "Adding…") : editingId ? "Save changes" : "Add to catalog"}
         </button>
       </form>
 
       <ul className="space-y-2">
         {songs.map((song) => (
-          <li key={song.id} className="rounded-xl border border-line bg-card p-3 text-sm">
-            <span className="font-medium">{song.title}</span>
-            {song.artist && <span className="text-dim"> — {song.artist}</span>}
-            <span className="ml-2 rounded-full bg-chip px-2 py-0.5 text-xs text-muted">{song.type}</span>
-            {!song.isLibrary && <span className="ml-2 text-xs text-dim">assignment-only</span>}
+          <li key={song.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-card p-3 text-sm">
+            <div className="min-w-0">
+              <span className="font-medium">{song.title}</span>
+              {song.artist && <span className="text-dim"> — {song.artist}</span>}
+              <span className="ml-2 rounded-full bg-chip px-2 py-0.5 text-xs text-muted">{song.type}</span>
+              {!song.isLibrary && <span className="ml-2 text-xs text-dim">assignment-only</span>}
+            </div>
+            <button
+              type="button"
+              onClick={() => startEdit(song)}
+              className="shrink-0 rounded-lg border border-line px-2.5 py-1 text-xs font-medium text-muted hover:bg-chip hover:text-ink"
+            >
+              Edit
+            </button>
           </li>
         ))}
       </ul>
