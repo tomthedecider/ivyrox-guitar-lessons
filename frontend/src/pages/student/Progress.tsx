@@ -3,6 +3,7 @@ import { api } from "../../api/client";
 import { ChordMastery, SongLearnedEntry, StreakInfo } from "../../types";
 import { formatDate } from "../../lib/format";
 import ChordDiagram from "../../components/ChordDiagram";
+import ChordPlayButton from "../../components/ChordPlayButton";
 
 export default function StudentProgress() {
   const [timeline, setTimeline] = useState<SongLearnedEntry[]>([]);
@@ -114,6 +115,7 @@ export default function StudentProgress() {
                     <span className="h-3.5 w-3.5 shrink-0 rounded-sm border border-line" />
                   )}
                   {chord.chordName}
+                  <ChordPlayButton chordName={chord.chordName} />
                 </span>
               </label>
             </li>

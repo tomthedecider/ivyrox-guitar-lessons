@@ -22,3 +22,16 @@ export const CHORD_SHAPES: Record<string, ChordShape> = {
   G7: { frets: [3, 2, 0, 0, 0, 1] },
   A7: { frets: ["x", 0, 2, 0, 2, 0] },
 };
+
+// Standard tuning, low E to high e, in Hz.
+const OPEN_STRING_HZ = [82.41, 110.0, 146.83, 196.0, 246.94, 329.63];
+
+// Pitches of every fretted/open (non-muted) string in a chord, low to high —
+// what a clean reference playback of the chord should sound like.
+export function getChordFrequencies(chordName: string): number[] {
+  const shape = CHORD_SHAPES[chordName.trim()];
+  if (!shape) return [];
+  return shape.frets
+    .map((fret, i) => (fret === "x" ? null : OPEN_STRING_HZ[i] * Math.pow(2, fret / 12)))
+    .filter((freq): freq is number => freq !== null);
+}
