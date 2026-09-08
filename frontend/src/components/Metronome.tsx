@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 const MIN_BPM = 40;
 const MAX_BPM = 240;
 const STEP = 5;
+const BEATS_PER_BAR = 4;
 
 // Self-correcting scheduler: each tick re-measures against performance.now()
 // rather than trusting setInterval's drift, so tempo stays accurate over a
@@ -14,6 +15,7 @@ export default function Metronome({ initialBpm = 80 }: { initialBpm?: number }) 
   const timerRef = useRef<number | null>(null);
   const nextTickRef = useRef(0);
   const bpmRef = useRef(bpm);
+  const beatRef = useRef(0);
 
   useEffect(() => {
     bpmRef.current = bpm;
@@ -28,13 +30,16 @@ export default function Metronome({ initialBpm = 80 }: { initialBpm?: number }) 
     return <p className="text-xs text-dim">Metronome isn't supported in this browser.</p>;
   }
 
-  function click() {
+  // Beat 1 of every bar gets a higher-pitched, slightly louder click so the
+  // downbeat is audible against the other three — this app only ever
+  // practices in 4/4, so the bar length is fixed rather than configurable.
+  function click(accent: boolean) {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.frequency.value = 1000;
-    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    osc.frequency.value = accent ? 1600 : 1000;
+    gain.gain.setValueAtTime(accent ? 0.5 : 0.4, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -42,11 +47,16 @@ export default function Metronome({ initialBpm = 80 }: { initialBpm?: number }) 
     osc.stop(ctx.currentTime + 0.05);
   }
 
+  function tick() {
+    click(beatRef.current % BEATS_PER_BAR === 0);
+    beatRef.current += 1;
+  }
+
   function scheduleNext() {
     nextTickRef.current += 60000 / bpmRef.current;
     const delay = Math.max(0, nextTickRef.current - performance.now());
     timerRef.current = window.setTimeout(() => {
-      click();
+      tick();
       scheduleNext();
     }, delay);
   }
@@ -54,8 +64,9 @@ export default function Metronome({ initialBpm = 80 }: { initialBpm?: number }) 
   function start() {
     audioCtxRef.current = new AudioContextCtor!();
     nextTickRef.current = performance.now();
+    beatRef.current = 0;
     setPlaying(true);
-    click();
+    tick();
     scheduleNext();
   }
 
